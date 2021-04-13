@@ -1,4 +1,4 @@
-package com.udacity.jwdnd.course1.cloudstorage.model.pojos;
+package com.udacity.jwdnd.course1.cloudstorage.model;
 
 public class Note {
 

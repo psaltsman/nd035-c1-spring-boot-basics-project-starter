@@ -1,7 +1,9 @@
 package com.udacity.jwdnd.course1.cloudstorage.services;
 
 import com.udacity.jwdnd.course1.cloudstorage.mappers.UserMapper;
-import com.udacity.jwdnd.course1.cloudstorage.model.pojos.User;
+import com.udacity.jwdnd.course1.cloudstorage.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,6 +14,8 @@ import java.util.ArrayList;
 
 @Service
 public class AuthenticationService implements AuthenticationProvider {
+
+    private Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
     private UserMapper userMapper;
     private HashService hashService;
@@ -24,6 +28,8 @@ public class AuthenticationService implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+
+        logger.debug("authenticate");
 
         String username = authentication.getName();
         String password = authentication.getCredentials().toString();

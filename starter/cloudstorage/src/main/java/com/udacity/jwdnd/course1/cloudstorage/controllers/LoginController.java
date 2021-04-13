@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class LoginController {
 
     @GetMapping
-    public String gotoLoginPage(Model model) {
+    public String gotoLoginPage() {
 
         return "login";
     }

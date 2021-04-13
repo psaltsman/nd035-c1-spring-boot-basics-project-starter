@@ -1,9 +1,10 @@
-package com.udacity.jwdnd.course1.cloudstorage.model.pojos;
+package com.udacity.jwdnd.course1.cloudstorage.model;
 
 public class Credential {
 
     private int credentialid;
     private int userid;
+    private String url;
     private String username;
     private String key;
     private String password;
@@ -22,6 +23,14 @@ public class Credential {
 
     public void setUserid(int userid) {
         this.userid = userid;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String getUsername() {
