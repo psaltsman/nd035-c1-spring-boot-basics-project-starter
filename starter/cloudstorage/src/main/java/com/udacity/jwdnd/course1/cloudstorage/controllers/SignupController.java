@@ -25,7 +25,7 @@ public class SignupController {
     }
 
     @GetMapping
-    public String signup() {
+    public String index() {
 
         logger.debug("signup");
 
@@ -38,7 +38,7 @@ public class SignupController {
         logger.debug("createUser");
 
         //Check for an existing user before proceeding
-        if (userService.isExistingUserName(user.getUsername())) {
+        if (userService.getUser(user.getUsername()) != null) {
 
             model.addAttribute("signupError", "The username already exists.  Please enter a different one.");
         //Continue with the account creation

@@ -24,17 +24,12 @@ public class UserService {
         this.hashService = hashService;
     }
 
-    /**
-     * Checks to see if a user with the same username already exists.
-     * @param username The {@link java.lang.String} value of the username
-     * @return boolean True if the username already exists in the database, false otherwise
-     */
-    public boolean isExistingUserName(String username) {
+    public User getUser(String username) {
 
-        logger.debug("isExistingUserName: " + username);
+        logger.debug("getUser: " + username);
 
         //If the return object is null then the username has not already been used
-        return userMapper.getUser(username) != null;
+        return userMapper.getUser(username);
     }
 
     /**
@@ -63,5 +58,10 @@ public class UserService {
 
         //Return the number of rows created which we expect to be 1.  If it return 0 then the insert was unsuccessful
         return userMapper.insert(toInsert) > 0;
+    }
+
+    public Integer getUserIdByUsername(String userName) {
+
+        return null;
     }
 }

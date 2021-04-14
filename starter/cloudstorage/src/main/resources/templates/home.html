@@ -3,12 +3,15 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-        <link rel="stylesheet" type="text/css" media="all" th:href="@{/css/bootstrap.min.css}">
-
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
         <title>Home</title>
     </head>
     <body class="p-3 mb-2 bg-light text-black">
+        <form id="deleteNoteForm" action="#" th:action="@{/home/note/delete}" method="POST">
+            <input type="hidden" name="noteId" id="d-note-id">
+            <input type="hidden" name="noteTitle" id="d-note-title">
+            <input type="hidden" name="noteDescription" id="d-note-description">
+        </form>
         <div class="container">
             <div id="logoutDiv">
                 <form action="#" th:action="@{/logout}" method="POST">
@@ -75,13 +78,20 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
+                                    <tr th:each="note : ${allUserNotes}">
                                         <td>
-                                            <button type="button" class="btn btn-success">Edit</button>
-                                            <a class="btn btn-danger">Delete</a>
+                                            <button
+                                                    type="button"
+                                                    class="btn btn-success"
+                                                    th:attr="data-id=${note.noteId}, data-title=${note.noteTitle}, data-desc=${note.noteDescription}"
+                                                    th:onclick="showNoteModal(this.getAttribute('data-id'), this.getAttribute('data-title'), this.getAttribute('data-desc'));">Edit</button>
+                                            <a
+                                                    class="btn btn-danger"
+                                                    th:attr="data-id=${note.noteId}"
+                                                    th:onclick="deleteNote(this.getAttribute('data-id'));">Delete</a>
                                         </td>
-                                        <th scope="row">Example Note Title</th>
-                                        <td>Example Note Description </td>
+                                        <td th:text="${note.noteTitle}">Example Note Title</td>
+                                        <td th:text="${note.noteDescription}">Example Note Description</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -97,11 +107,11 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" method="POST">
+                                        <form action="#" th:action="@{/home/note}" method="POST">
                                             <input type="hidden" name="noteId" id="note-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">Title</label>
-                                                <input type="text" name= "noteTitle" class="form-control" id="note-title" maxlength="20" required>
+                                                <input type="text" name="noteTitle" class="form-control" id="note-title" maxlength="20" required>
                                             </div>
                                             <div class="form-group">
                                                 <label for="note-description" class="col-form-label">Description</label>
@@ -185,13 +195,22 @@
                 </div>
             </div>
         </div>
-
-        <script th:src="@{/js/jquery-slim.min.js}"></script>
-        <script th:src="@{/js/popper.min.js}"></script>
-        <script th:src="@{/js/bootstrap.min.js}"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
 
         <!--For opening the note modal-->
         <script type="text/javascript">
+
+            function deleteNote(noteId) {
+
+                if (confirm("Delete note?")) {
+
+                    $('#d-note-id').val(noteId);
+                    $('#deleteNoteForm').submit();
+                }
+            }
+
             // For opening the note modal
             function showNoteModal(noteId, noteTitle, noteDescription) {
                 $('#note-id').val(noteId ? noteId : '');
