@@ -1,6 +1,5 @@
 package com.udacity.jwdnd.course1.cloudstorage.services;
 
-import com.udacity.jwdnd.course1.cloudstorage.controllers.HomeController;
 import com.udacity.jwdnd.course1.cloudstorage.mappers.NoteMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
@@ -13,7 +12,7 @@ import java.util.List;
 @Service
 public class NoteService {
 
-    private Logger logger = LoggerFactory.getLogger(NoteService.class);
+    private final Logger logger = LoggerFactory.getLogger(NoteService.class);
 
     private NoteMapper noteMapper;
 

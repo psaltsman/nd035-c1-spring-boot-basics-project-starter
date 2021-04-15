@@ -1,7 +1,9 @@
 package com.udacity.jwdnd.course1.cloudstorage.controllers;
 
+import com.udacity.jwdnd.course1.cloudstorage.model.Credential;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
+import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.slf4j.Logger;
@@ -19,13 +21,15 @@ public class HomeController {
 
     private Logger logger = LoggerFactory.getLogger(HomeController.class);
 
-    private NoteService noteService;
     private UserService userService;
+    private NoteService noteService;
+    private CredentialService credentialService;
 
-    public HomeController(NoteService noteService, UserService userService) {
+    public HomeController(UserService userService, NoteService noteService, CredentialService credentialService) {
 
-        this.noteService = noteService;
         this.userService = userService;
+        this.noteService = noteService;
+        this.credentialService = credentialService;
     }
 
     @GetMapping
@@ -40,10 +44,10 @@ public class HomeController {
 
         logger.debug("allUserNotes: = " + allUserNotes.size());
 
-        for (Note note : allUserNotes) {
+        List<Credential> allUserCredentials = credentialService.getAllCredentials(authenticatedUser);
+        model.addAttribute("allUserCredentials", allUserCredentials);
 
-            logger.debug(">>> " + note.getNoteId() + ": " + note.getNoteTitle());
-        }
+        logger.debug("allUserCredentials: = " + allUserCredentials.size());
 
         return "home";
     }
@@ -52,15 +56,19 @@ public class HomeController {
     public String handleNote(@ModelAttribute Note note, Model model, Authentication authentication) {
 
         logger.debug("handleNote");
+        logger.debug("title: " + note.getNoteTitle());
+        logger.debug("description: " + note.getNoteDescription());
+        logger.debug("userId: " + note.getUserId());
 
         User authenticatedUser = userService.getUser(authentication.getName());
 
         String successMsg = null;
         String errorMsg = null;
 
+        //For some reason copy/pasting into the description textarea is allowing values greater than the db column width
+        //and greater than the input field's maxLength.
         String noteDescription = note.getNoteDescription();
 
-        //For some reason copy/pasting into the description is allowing values greater than the db column width
         if (noteDescription != null && noteDescription.length() > 1000) {
 
             noteDescription = noteDescription.substring(0, 999);
@@ -70,11 +78,8 @@ public class HomeController {
         if (note.getNoteId() == null) {
 
             logger.debug("saving new note");
-            note.setUserId(authenticatedUser.getUserid());
 
-            logger.debug("userid: " + note.getUserId());
-            logger.debug("title: " + note.getNoteTitle());
-            logger.debug("description: " + note.getNoteDescription());
+            note.setUserId(authenticatedUser.getUserid());
 
             try {
 
@@ -101,6 +106,67 @@ public class HomeController {
             }
 
             successMsg = "Your note was successfully updated.";
+        }
+
+        if (errorMsg != null) {
+
+            model.addAttribute("errorMsg", errorMsg);
+
+        } else {
+
+            model.addAttribute("successMsg", successMsg);
+        }
+
+        return "result";
+    }
+
+    @PostMapping(path="/credential")
+    public String handleCredential(@ModelAttribute Credential credential, Model model, Authentication authentication) {
+
+        logger.debug("handleCredential");
+
+        logger.debug("credentialId: " + credential.getCredentialId());
+        logger.debug("url: " + credential.getUrl());
+        logger.debug("username: " + credential.getUsername());
+        logger.debug("key: " + credential.getKey());
+        logger.debug("password: " + credential.getPassword());
+        logger.debug("userId: " + credential.getUserId());
+
+        User authenticatedUser = userService.getUser(authentication.getName());
+
+        String successMsg = null;
+        String errorMsg = null;
+
+        if (credential.getCredentialId() == null) {
+
+            logger.debug("saving new credential");
+            credential.setUserId(authenticatedUser.getUserid());
+
+            try {
+
+                credentialService.insertCredential(credential);
+
+            } catch (Exception ex) {
+
+                errorMsg = "Your credential could not be saved due to the following error: " + ex.getClass().getName() + " - " + ex.getMessage();
+            }
+
+            successMsg = "Your credential was successfully saved.";
+
+        } else {
+
+            logger.debug("updating existing credential");
+
+            try {
+
+                credentialService.updateCredential(credential);
+
+            } catch (Exception ex) {
+
+                errorMsg = "Your credential could not be updated due to the following error: " + ex.getClass().getName() + " - " + ex.getMessage();
+            }
+
+            successMsg = "Your credential was successfully updated.";
         }
 
         if (errorMsg != null) {
@@ -144,5 +210,43 @@ public class HomeController {
         }
 
         return "result";
+    }
+
+    @PostMapping(path="/credential/delete")
+    public String deleteCredential(@ModelAttribute Credential credential, Model model) {
+
+        logger.debug("deleteCredential");
+
+        String successMsg = null;
+        String errorMsg = null;
+
+        try {
+
+            credentialService.deleteCredential(credential);
+
+        } catch (Exception ex) {
+
+            errorMsg = "Your credential could not be deleted due to the following error: " + ex.getClass().getName() + " - " + ex.getMessage();
+        }
+
+        successMsg = "Your credential was successfully deleted.";
+
+        if (errorMsg != null) {
+
+            model.addAttribute("errorMsg", errorMsg);
+
+        } else {
+
+            model.addAttribute("successMsg", successMsg);
+        }
+
+        return "result";
+    }
+
+    @GetMapping(value="/getCredentialById")
+    @ResponseBody
+    public Credential getCredentialById(@RequestParam(value="credentialId", required=true) String credentialId) {
+
+        return credentialService.getCredentialById(Integer.parseInt(credentialId));
     }
 }
