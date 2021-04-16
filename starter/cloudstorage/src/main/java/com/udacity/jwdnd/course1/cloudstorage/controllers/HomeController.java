@@ -1,17 +1,23 @@
 package com.udacity.jwdnd.course1.cloudstorage.controllers;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.Credential;
+import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
+import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,12 +28,14 @@ public class HomeController {
     private Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     private UserService userService;
+    private FileService fileService;
     private NoteService noteService;
     private CredentialService credentialService;
 
-    public HomeController(UserService userService, NoteService noteService, CredentialService credentialService) {
+    public HomeController(UserService userService, FileService fileService, NoteService noteService, CredentialService credentialService) {
 
         this.userService = userService;
+        this.fileService = fileService;
         this.noteService = noteService;
         this.credentialService = credentialService;
     }
@@ -38,6 +46,12 @@ public class HomeController {
         logger.debug("index");
 
         User authenticatedUser = userService.getUser(authentication.getName());
+        model.addAttribute("authenticatedUser", authenticatedUser);
+
+        List<File> allUserFiles = fileService.getAllFiles(authenticatedUser);
+        model.addAttribute("allUserFiles", allUserFiles);
+
+        logger.debug("allUserFiles: = " + allUserFiles.size());
 
         List<Note> allUserNotes = noteService.getAllNotes(authenticatedUser);
         model.addAttribute("allUserNotes", allUserNotes);
@@ -50,6 +64,64 @@ public class HomeController {
         logger.debug("allUserCredentials: = " + allUserCredentials.size());
 
         return "home";
+    }
+
+    @PostMapping(path="/upload")
+    public String uploadFile(@RequestParam(value="fileUpload", required=true) MultipartFile fileUpload, Model model, Authentication authentication) {
+
+        logger.debug("upload");
+
+        String successMsg = null;
+        String errorMsg = null;
+
+        try {
+
+            File file = new File();
+            file.setFileName(fileUpload.getOriginalFilename());
+            file.setContentType(fileUpload.getContentType());
+            file.setFileSize(String.valueOf(fileUpload.getSize()));
+            file.setUserId(userService.getUser(authentication.getName()).getUserid());
+            file.setFileData(fileUpload.getBytes());
+
+            fileService.insertFile(file);
+
+        } catch (Exception ex) {
+
+            errorMsg = "Your file could not be saved due to the following error: " + ex.getClass().getName() + " - " + ex.getMessage();
+        }
+
+        successMsg = "Your file was successfully saved.";
+
+        if (errorMsg != null) {
+
+            model.addAttribute("errorMsg", errorMsg);
+
+        } else {
+
+            model.addAttribute("successMsg", successMsg);
+        }
+
+
+        return "result";
+    }
+
+    @GetMapping(path="/view")
+    public ResponseEntity viewFile(@RequestParam(value="fileId", required=true) String fileId) {
+
+        logger.debug("viewFile");
+        logger.debug("fileId=" + fileId);
+
+        File file = fileService.getFileById(Integer.parseInt(fileId));
+
+        logger.debug(file.getFileName());
+        logger.debug(file.getContentType());
+        logger.debug(file.getFileSize());
+        logger.debug("" + file.getFileData().length);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=\"" + file.getFileName() + "\"")
+                .contentType(MediaType.parseMediaType(file.getContentType()))
+                .body(file.getFileData());
     }
 
     @PostMapping(path="/note")
@@ -181,55 +253,39 @@ public class HomeController {
         return "result";
     }
 
-    @PostMapping(path="/note/delete")
-    public String deleteNote(@ModelAttribute Note note, Model model) {
+    @PostMapping(path="/delete/{type}/{id}")
+    public String handleDelete(@PathVariable(name="type") String type, @PathVariable(name="id") String id, Model model) {
 
-        logger.debug("deleteNote");
-
-        String successMsg = null;
-        String errorMsg = null;
-
-        try {
-
-            noteService.deleteNote(note);
-
-        } catch (Exception ex) {
-
-            errorMsg = "Your note could not be deleted due to the following error: " + ex.getClass().getName() + " - " + ex.getMessage();
-        }
-
-        successMsg = "Your note was successfully deleted.";
-
-        if (errorMsg != null) {
-
-            model.addAttribute("errorMsg", errorMsg);
-
-        } else {
-
-            model.addAttribute("successMsg", successMsg);
-        }
-
-        return "result";
-    }
-
-    @PostMapping(path="/credential/delete")
-    public String deleteCredential(@ModelAttribute Credential credential, Model model) {
-
-        logger.debug("deleteCredential");
+        logger.debug("delete/" + type + "/" + id);
 
         String successMsg = null;
         String errorMsg = null;
 
         try {
 
-            credentialService.deleteCredential(credential);
+            Integer idToDelete = Integer.parseInt(id);
+
+            switch(type) {
+
+                case "file":
+                    fileService.deleteFile(idToDelete);
+                    break;
+
+                case "note":
+                    noteService.deleteNote(idToDelete);
+                    break;
+
+                case "credential":
+                    credentialService.deleteCredential(idToDelete);
+                    break;
+            }
 
         } catch (Exception ex) {
 
-            errorMsg = "Your credential could not be deleted due to the following error: " + ex.getClass().getName() + " - " + ex.getMessage();
+            errorMsg = "The " + type + " could not be deleted due to the following error: " + ex.getClass().getName() + " - " + ex.getMessage();
         }
 
-        successMsg = "Your credential was successfully deleted.";
+        successMsg = "The " + type + " was successfully deleted.";
 
         if (errorMsg != null) {
 

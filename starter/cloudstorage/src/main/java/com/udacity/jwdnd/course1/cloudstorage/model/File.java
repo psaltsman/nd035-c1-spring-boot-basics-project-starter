@@ -2,58 +2,58 @@ package com.udacity.jwdnd.course1.cloudstorage.model;
 
 public class File {
 
-    private int fileid;
-    private int userid;
-    private String filename;
-    private String contenttype;
-    private String filesize;
-    private String filedata;
+    private int fileId;
+    private String fileName;
+    private String contentType;
+    private String fileSize;
+    private int userId;
+    private byte[] fileData;
 
-    public int getFileid() {
-        return fileid;
+    public int getFileId() {
+        return fileId;
     }
 
-    public void setFileid(int fileid) {
-        this.fileid = fileid;
+    public void setFileId(int fileId) {
+        this.fileId = fileId;
     }
 
-    public int getUserid() {
-        return userid;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setUserid(int userid) {
-        this.userid = userid;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
-    public String getFilename() {
-        return filename;
+    public String getContentType() {
+        return contentType;
     }
 
-    public void setFilename(String filename) {
-        this.filename = filename;
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
-    public String getContenttype() {
-        return contenttype;
+    public String getFileSize() {
+        return fileSize;
     }
 
-    public void setContenttype(String contenttype) {
-        this.contenttype = contenttype;
+    public void setFileSize(String fileSize) {
+        this.fileSize = fileSize;
     }
 
-    public String getFilesize() {
-        return filesize;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setFilesize(String filesize) {
-        this.filesize = filesize;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
-    public String getFiledata() {
-        return filedata;
+    public byte[] getFileData() {
+        return fileData;
     }
 
-    public void setFiledata(String filedata) {
-        this.filedata = filedata;
+    public void setFileData(byte[] fileData) {
+        this.fileData = fileData;
     }
 }

@@ -7,13 +7,8 @@
         <title>Home</title>
     </head>
     <body class="p-3 mb-2 bg-light text-black">
-        <form id="deleteNoteForm" action="#" th:action="@{/home/note/delete}" method="POST">
-            <input type="hidden" name="noteId" id="d-note-id">
-        </form>
-        <form id="deleteCredentialForm" action="#" th:action="@{/home/credential/delete}" method="POST">
-            <input type="hidden" name="credentialId" id="d-credential-id">
-        </form>
         <div class="container">
+            <h3 id="welcome-msg">Welcome back, <span th:text="${authenticatedUser.firstName}"></span></h3>
             <div id="logoutDiv">
                 <form action="#" th:action="@{/logout}" method="POST">
                     <button type="submit" class="btn btn-secondary float-right">Logout</button>
@@ -22,14 +17,14 @@
             <div id="contentDiv" style="clear: right;">
                 <nav style="clear: right;">
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <a class="nav-item nav-link active" id="nav-files-tab" data-toggle="tab" href="#nav-files" role="tab" aria-controls="nav-files" aria-selected="true">Files</a>
-                        <a class="nav-item nav-link" id="nav-notes-tab" data-toggle="tab" href="#nav-notes" role="tab" aria-controls="nav-notes" aria-selected="false">Notes</a>
-                        <a class="nav-item nav-link" id="nav-credentials-tab" data-toggle="tab" href="#nav-credentials" role="tab" aria-controls="nav-credentials" aria-selected="false">Credentials</a>
+                        <a class="nav-item nav-link active" id="nav-files-tab" data-toggle="tab" href="#nav-files" role="tab" aria-controls="nav-files" aria-selected="true">Files (<span th:text="${allUserFiles.size()}"></span>)</a>
+                        <a class="nav-item nav-link" id="nav-notes-tab" data-toggle="tab" href="#nav-notes" role="tab" aria-controls="nav-notes" aria-selected="false">Notes (<span th:text="${allUserNotes.size()}"></span>)</a>
+                        <a class="nav-item nav-link" id="nav-credentials-tab" data-toggle="tab" href="#nav-credentials" role="tab" aria-controls="nav-credentials" aria-selected="false">Credentials (<span th:text="${allUserCredentials.size()}"></span>)</a>
                     </div>
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
-                        <form action="#" enctype="multipart/form-data" method="POST">
+                        <form action="#" th:action="@{/home/upload}" enctype="multipart/form-data" method="POST">
                             <div class="container">
                                 <div class="row" style="margin: 1em;">
                                     <div class="col-sm-2">
@@ -53,13 +48,15 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
+                                <tr th:each="file : ${allUserFiles}">
                                     <td>
-                                        <a target="_blank" class="btn btn-success">View</a>
-                                        <a  class="btn btn-danger">Delete</a>
+                                        <form th:id="'delete-file-' + ${file.fileId}" action="#" th:action="@{'/home/delete/file/' + ${file.fileId}}" method="POST" hidden="true" aria-hidden="true"></form>
+                                        <a target="_blank" class="btn btn-success" th:href="@{/home/view(fileId=${file.fileId})}">View</a>
+                                        <a class="btn btn-danger" th:attr="data-id=${file.fileId},data-type=file" th:onclick="handleDelete(this.getAttribute('data-id'), this.getAttribute('data-type'));">Delete</a>
                                     </td>
-                                    <th scope="row">ExampleFile.txt</th>
+                                    <td th:text="${file.fileName}">ExampleFile.txt</td>
                                 </tr>
+                                <tr th:if="${allUserFiles.size() == 0}"><td colspan="2" style="text-align:center">You have not uploaded any files</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -81,20 +78,18 @@
                                 <tbody>
                                     <tr th:each="note : ${allUserNotes}">
                                         <td>
+                                            <form th:id="'delete-note-' + ${note.noteId}" action="#" th:action="@{'/home/delete/note/' + ${note.noteId}}" method="POST" hidden="true" aria-hidden="true"></form>
                                             <button
                                                     type="button"
                                                     class="btn btn-success"
                                                     th:attr="data-id=${note.noteId}, data-title=${note.noteTitle}, data-desc=${note.noteDescription}"
                                                     th:onclick="showNoteModal(this.getAttribute('data-id'), this.getAttribute('data-title'), this.getAttribute('data-desc'));">Edit</button>
-                                            <a
-                                                    class="btn btn-danger"
-                                                    th:attr="data-id=${note.noteId}"
-                                                    th:onclick="deleteNote(this.getAttribute('data-id'));">Delete</a>
+                                            <a class="btn btn-danger" th:attr="data-id=${note.noteId}, data-type=note" th:onclick="handleDelete(this.getAttribute('data-id'), this.getAttribute('data-type'));">Delete</a>
                                         </td>
                                         <td th:text="${note.noteTitle}">Example Note Title</td>
                                         <td th:text="${note.noteDescription}">Example Note Description</td>
                                     </tr>
-                                    <tr th:if="${allUserNotes.size() == 0}"><td colspan="3" style="text-align:center">You do not have any notes saved.  Click 'Add a New Note' to get started.</td></tr>
+                                    <tr th:if="${allUserNotes.size() == 0}"><td colspan="3" style="text-align:center">You have not saved any notes</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -148,21 +143,15 @@
                                 <tbody>
                                 <tr th:each="credential : ${allUserCredentials}">
                                     <td>
-                                        <button
-                                                type="button"
-                                                class="btn btn-success"
-                                                th:attr="data-id=${credential.credentialId}"
-                                                th:onclick="showCredentialModal(this.getAttribute('data-id'));">Edit</button>
-                                        <a
-                                                class="btn btn-danger"
-                                                th:attr="data-id=${credential.credentialId}"
-                                                th:onclick="deleteCredential(this.getAttribute('data-id'));">Delete</a>
+                                        <form th:id="'delete-credential-' + ${credential.credentialId}" action="#" th:action="@{'/home/delete/credential/' + ${credential.credentialId}}" method="POST" hidden="true" aria-hidden="true"></form>
+                                        <button type="button" class="btn btn-success" th:attr="data-id=${credential.credentialId}" th:onclick="showCredentialModal(this.getAttribute('data-id'));">Edit</button>
+                                        <a class="btn btn-danger" th:attr="data-id=${credential.credentialId}, data-type=credential" th:onclick="handleDelete(this.getAttribute('data-id'), this.getAttribute('data-type'));">Delete</a>
                                     </td>
                                     <td th:text="${credential.url}">Example Credential URL</td>
                                     <td th:text="${credential.username}">Example Credential Username</td>
                                     <td th:text="${credential.password}">Example Credential Password</td>
                                 </tr>
-                                <tr th:if="${allUserCredentials.size() == 0}"><td colspan="4" style="text-align:center">You do not have any credentials saved.  Click 'Add a New Credential' to get started.</td></tr>
+                                <tr th:if="${allUserCredentials.size() == 0}"><td colspan="4" style="text-align:center">You have not saved any credentials</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -212,21 +201,11 @@
         <!--For opening the note modal-->
         <script type="text/javascript">
 
-            function deleteNote(noteId) {
+            function handleDelete(id, type) {
 
-                if (confirm("Delete note?")) {
+                if (confirm("Delete " + type + "?")) {
 
-                    $('#d-note-id').val(noteId);
-                    $('#deleteNoteForm').submit();
-                }
-            }
-
-            function deleteCredential(credentialId) {
-
-                if (confirm("Delete credential?")) {
-
-                    $('#d-credential-id').val(credentialId);
-                    $('#deleteCredentialForm').submit();
+                    $('#delete-' + type + '-' + id).submit();
                 }
             }
 
@@ -252,8 +231,6 @@
 	            	        url: "/home/getCredentialById",
 	            	        data: {credentialId: credentialId},
 	            	        success: function(data) {
-
-	            	            console.log(data);
 
 	            	            $('#credential-id').val(credentialId);
                                 $('#credential-url').val(data.url);

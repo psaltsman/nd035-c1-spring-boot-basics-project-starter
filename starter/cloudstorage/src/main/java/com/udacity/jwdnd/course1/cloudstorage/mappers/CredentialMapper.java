@@ -20,7 +20,7 @@ public interface CredentialMapper {
     public int updateCredential(Credential credential);
 
     @Delete("delete from credentials where credentialid=#{credentialId}")
-    public int deleteCredential(Credential credential);
+    public int deleteCredential(Integer credential);
 
     @Select("select * from credentials where credentialid = #{credentialId}")
     public Credential getCredentialById(Integer credentialId);
