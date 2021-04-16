@@ -28,16 +28,10 @@ public class UserService {
 
         logger.debug("getUser: " + username);
 
-        //If the return object is null then the username has not already been used
         return userMapper.getUser(username);
     }
 
-    /**
-     * Creates a new user record.
-     * @param user A {@link com.udacity.jwdnd.course1.cloudstorage.model.User} object
-     * @return boolean True if the new record was created, false otherwise
-     */
-    public boolean createNewUser(User user) {
+    public int createNewUser(User user) {
 
         logger.debug("createNewUser: " + user.getUsername());
 
@@ -56,8 +50,7 @@ public class UserService {
                 user.getFirstName(),
                 user.getLastName());
 
-        //Return the number of rows created which we expect to be 1.  If it return 0 then the insert was unsuccessful
-        return userMapper.insert(toInsert) > 0;
+        return userMapper.insert(toInsert);
     }
 
     public Integer getUserIdByUsername(String userName) {

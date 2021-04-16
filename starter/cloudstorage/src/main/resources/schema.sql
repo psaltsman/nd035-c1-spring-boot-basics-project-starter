@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS USERS (
   salt VARCHAR,
   password VARCHAR,
   firstname VARCHAR(20),
-  lastname VARCHAR(20)
+  lastname VARCHAR(20),
+  CONSTRAINT username_constraint UNIQUE (username)
 );
 
 CREATE TABLE IF NOT EXISTS NOTES (
@@ -22,7 +23,8 @@ CREATE TABLE IF NOT EXISTS FILES (
     filesize VARCHAR,
     userid INT,
     filedata BLOB,
-    foreign key (userid) references USERS(userid)
+    foreign key (userid) references USERS(userid),
+    CONSTRAINT filename_constraint UNIQUE (filename, userid)
 );
 
 CREATE TABLE IF NOT EXISTS CREDENTIALS (

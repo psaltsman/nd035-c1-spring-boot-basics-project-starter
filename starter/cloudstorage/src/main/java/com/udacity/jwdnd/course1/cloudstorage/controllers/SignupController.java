@@ -4,6 +4,7 @@ import com.udacity.jwdnd.course1.cloudstorage.model.User;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,22 +38,27 @@ public class SignupController {
 
         logger.debug("createUser");
 
-        //Check for an existing user before proceeding
-        if (userService.getUser(user.getUsername()) != null) {
+        String signupError = null;
 
-            model.addAttribute("signupError", "The username already exists.  Please enter a different one.");
-        //Continue with the account creation
+        try {
+
+            userService.createNewUser(user);
+
+        } catch (DuplicateKeyException dke) {
+
+            signupError = "That username is not available";
+
+        } catch (Exception ex) {
+
+            signupError = "An error occurred when attempting to create your account: " + ex.getClass().getName() + " - " + ex.getMessage();
+        }
+
+        if (signupError != null) {
+
+            model.addAttribute("signupError", signupError);
         } else {
 
-            //Success!
-            if (userService.createNewUser(user)) {
-
-                model.addAttribute("signupSuccess", "");
-
-            } else {
-
-                model.addAttribute("signupError", "An error occurred and your account could not be created.");
-            }
+            model.addAttribute("signupSuccess", "");
         }
 
         return "signup";

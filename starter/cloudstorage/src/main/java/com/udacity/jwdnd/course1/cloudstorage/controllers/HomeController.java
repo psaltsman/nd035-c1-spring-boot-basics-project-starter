@@ -10,6 +10,7 @@ import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -76,14 +77,27 @@ public class HomeController {
 
         try {
 
-            File file = new File();
-            file.setFileName(fileUpload.getOriginalFilename());
-            file.setContentType(fileUpload.getContentType());
-            file.setFileSize(String.valueOf(fileUpload.getSize()));
-            file.setUserId(userService.getUser(authentication.getName()).getUserid());
-            file.setFileData(fileUpload.getBytes());
+            String originalName = fileUpload.getOriginalFilename();
 
-            fileService.insertFile(file);
+            if (originalName != null && !originalName.equals("")) {
+
+                File file = new File();
+                file.setFileName(originalName);
+                file.setContentType(fileUpload.getContentType());
+                file.setFileSize(String.valueOf(fileUpload.getSize()));
+                file.setUserId(userService.getUser(authentication.getName()).getUserid());
+                file.setFileData(fileUpload.getBytes());
+
+                fileService.insertFile(file);
+
+            } else {
+
+                throw new Exception("You did not select a file");
+            }
+
+        } catch (DuplicateKeyException dke) {
+
+            errorMsg = "It appears that you have already uploaded that file";
 
         } catch (Exception ex) {
 
