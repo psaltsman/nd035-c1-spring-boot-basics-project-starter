@@ -11,7 +11,7 @@
             <h3 id="welcome-msg">Welcome back, <span th:text="${authenticatedUser.firstName}"></span></h3>
             <div id="logoutDiv">
                 <form action="#" th:action="@{/logout}" method="POST">
-                    <button type="submit" class="btn btn-secondary float-right">Logout</button>
+                    <button id="buttonLogout" type="submit" class="btn btn-secondary float-right">Logout</button>
                 </form>
             </div>
             <div id="contentDiv" style="clear: right;">
@@ -89,7 +89,7 @@
                                         <td th:text="${note.noteTitle}">Example Note Title</td>
                                         <td th:text="${note.noteDescription}">Example Note Description</td>
                                     </tr>
-                                    <tr th:if="${allUserNotes.size() == 0}"><td colspan="3" style="text-align:center">You have not saved any notes</td></tr>
+                                    <tr th:if="${allUserNotes.size() == 0}"><td colspan="3" style="text-align:center"><span id="no-notes-msg">You have not saved any notes</span></td></tr>
                                 </tbody>
                             </table>
                         </div>
