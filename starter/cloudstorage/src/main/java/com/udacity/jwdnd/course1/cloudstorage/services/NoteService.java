@@ -26,14 +26,14 @@ public class NoteService {
         return noteMapper.getAllNotesByUser(user);
     }
 
-    public void insertNote(Note note) {
+    public int insertNote(Note note) {
 
-        noteMapper.insertNote(note);
+        return noteMapper.insertNote(note);
     }
 
-    public void updateNote(Note note) {
+    public int updateNote(Note note) {
 
-        noteMapper.updateNote(note);
+        return noteMapper.updateNote(note);
     }
 
     public int deleteNote(Integer noteId) {
