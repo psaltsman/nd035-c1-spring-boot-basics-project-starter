@@ -104,12 +104,7 @@ class CloudStorageApplicationTests {
 		Assertions.assertEquals("Sign Up", driver.getTitle());
 		SignupPageObject signUpPage = new SignupPageObject(driver);
 		signUpPage.signup(testLoginFirstName, testLoginLastName, testLoginUsername, testLoginPassword);
-		Assertions.assertEquals("You successfully signed up! Please continue to the login page.", signUpPage.getSuccessMsg());
-
-		//Test signing up again with the same username
-		signUpPage.signup(testLoginFirstName, testLoginLastName, testLoginUsername, testLoginPassword);
-		Assertions.assertEquals("That username is not available", signUpPage.getErrorMsg());
-
+		
 		//Test logging in with the new username and password
 		driver.get("http://localhost:" + this.port + "/login");
 		Assertions.assertEquals("Login", driver.getTitle());
@@ -135,6 +130,14 @@ class CloudStorageApplicationTests {
 		Assertions.assertEquals("Login", driver.getTitle());
 		loginPage.login(testLoginUsername, "badPassword");
 		Assertions.assertEquals("Invalid username or password", loginPage.getErrorMsg());
+
+		driver.get("http://localhost:" + this.port + "/signup");
+		Assertions.assertEquals("Sign Up", driver.getTitle());
+		signUpPage = new SignupPageObject(driver);
+		signUpPage.signup(testLoginFirstName, testLoginLastName, testLoginUsername, testLoginPassword);
+
+		signUpPage.signup(testLoginFirstName, testLoginLastName, testLoginUsername, testLoginPassword);
+		Assertions.assertEquals("That username is not available", signUpPage.getErrorMsg());
 	}
 
 	@Test
