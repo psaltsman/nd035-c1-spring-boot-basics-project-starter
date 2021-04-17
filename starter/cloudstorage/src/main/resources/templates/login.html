@@ -10,6 +10,9 @@
         <div class="container justify-content-center p-3" style="background-color: #eeeeee; margin-top: 5em;">
             <h1 class="display-5">Login</h1>
             <form action="#" th:action="@{/login}" method="POST">
+                <div id="success-msg" th:if="${successMsg}" th:text="${successMsg}" class="alert alert-dark">
+                    Your account has been created
+                </div>
                 <div id="error-msg" th:if="${param.error}" class="alert alert-danger">
                     Invalid username or password
                 </div>
