@@ -151,7 +151,7 @@
                                     <td th:text="${credential.username}">Example Credential Username</td>
                                     <td th:text="${credential.password}">Example Credential Password</td>
                                 </tr>
-                                <tr th:if="${allUserCredentials.size() == 0}"><td colspan="4" style="text-align:center">You have not saved any credentials</td></tr>
+                                <tr th:if="${allUserCredentials.size() == 0}"><td colspan="4" style="text-align:center"><span id="no-credentials-msg">You have not saved any credentials</span></td></tr>
                                 </tbody>
                             </table>
                         </div>
