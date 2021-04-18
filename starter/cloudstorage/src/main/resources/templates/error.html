@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <title>Home</title>
+</head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+</head>
+<body>
+    <div class="container">
+        <div class="jumbotron">
+            <h2>An error has occurred...</h2>
+            <h3 th:text="${status + ' ' + error}"></h3>
+        </div>
+        <h4>Click <a href="/" th:href="@{/home}">here</a> to return to the home page</h4>
+    </div>
+</body>
+</html>
